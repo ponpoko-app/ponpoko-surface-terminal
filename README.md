@@ -11,12 +11,12 @@ to talk to its own backend.
 
 ## Install
 
-This is a repository of its own — `zurge-co/ponpoko-surface-terminal` — with its
+This is a repository of its own — `ponpoko-app/ponpoko-surface-terminal` — with its
 own `bun.lock` and its own build task, so it builds from a checkout of itself and
 from nothing else:
 
 ```sh
-git clone git@github.com:zurge-co/ponpoko-surface-terminal.git
+git clone git@github.com:ponpoko-app/ponpoko-surface-terminal.git
 cd ponpoko-surface-terminal
 bun install
 bun run build
@@ -219,7 +219,7 @@ opened before it exits.
 
 ## Public Host contract
 
-External agents start with [the Surface SDK skill](https://github.com/zurge-co/ponpoko-surface-sdk/blob/main/SKILL.md).
+External agents start with [the Surface SDK skill](https://github.com/ponpoko-app/surface-sdk/blob/main/SKILL.md).
 The versioned broker, types and compatibility checks are public; a private Host
 checkout is not required. This surface has no AI requirement and does not need
 to vendor AI assets merely to use its backend. The Host remains the authority
