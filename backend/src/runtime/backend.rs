@@ -1,4 +1,5 @@
 use std::io::Write;
+use std::ffi::OsStr;
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 use base64::engine::general_purpose::STANDARD as BASE64;
@@ -7,6 +8,23 @@ use portable_pty::{native_pty_system, CommandBuilder, PtySize};
 use serde_json::{json, Value};
 
 use super::*;
+
+fn private_host_variable(name: &OsStr) -> bool {
+    let key = name.to_string_lossy().to_ascii_uppercase();
+    matches!(key.as_str(), "PONPOKO_HOST_CONTROL" | "PONPOKO_HOST_DATABASE" | "PONPOKO_HOME" | "PONPOKO_DB")
+        || key.starts_with("PONPOKO_BRIDGE")
+}
+
+#[cfg(test)]
+#[test]
+fn a_pty_inherits_ordinary_user_variables_but_omits_private_host_variables() {
+    for name in ["PONPOKO_HOST_CONTROL", "ponpoko_host_database", "PONPOKO_BRIDGE_TOKEN", "PONPOKO_HOME", "PONPOKO_DB"] {
+        assert!(private_host_variable(OsStr::new(name)));
+    }
+    for name in ["HOME", "PATH", "PONPOKO_SURFACE_ID"] {
+        assert!(!private_host_variable(OsStr::new(name)));
+    }
+}
 
 pub struct Backend {
     pub(crate) sessions: Vec<Session>,
@@ -100,6 +118,11 @@ impl Backend {
         command.cwd(&cwd);
         if let Some(flag) = login_flag(&shell) {
             command.arg(flag);
+        }
+        for (name, _) in std::env::vars_os() {
+            if private_host_variable(&name) {
+                command.env_remove(name);
+            }
         }
         command.env("TERM", "xterm-256color");
         command.env("COLORTERM", "truecolor");
